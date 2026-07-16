@@ -1,0 +1,31 @@
+[Unit]
+Description=San Pedro Bay pipeline - positions silver streaming job
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/san-pedro-bay-pipeline
+Environment=KAFKA_BOOTSTRAP=localhost:9092
+Environment=SCHEMA_REGISTRY_URL=http://localhost:8081
+Environment=LAKEHOUSE_BACKEND=oci
+Environment=OCI_NAMESPACE=ax5rxkwswz5n
+Environment=OCI_REGION=us-sanjose-1
+Environment=LAKEHOUSE_BUCKET=san-pedro-bay-lakehouse
+# Sedona join is the heavier of the two jobs' non-Delta work; 3g leaves
+# room for vessel-state's 4g + Redpanda's 1g + OS/docker overhead within
+# the 12GB Always Free ceiling (infra/oci/variables.tf).
+Environment=SPARK_DRIVER_MEMORY=3g
+Environment=JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64
+Environment=PATH=/usr/lib/jvm/java-21-openjdk-arm64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/home/ubuntu/san-pedro-bay-pipeline/.venv/bin/python /home/ubuntu/san-pedro-bay-pipeline/processing/streaming/positions_silver_job.py
+# Structured streaming's checkpoint IS the recovery mechanism (see
+# README's crash-durability design decision) -- restarting on any failure
+# and resuming from the last committed checkpoint is the whole point,
+# not a bandage over a bug.
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

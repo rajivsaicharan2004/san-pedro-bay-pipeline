@@ -83,6 +83,12 @@ def build_spark_session(
         # already UTC; pinning the session to UTC avoids silent local-tz
         # skew when timestamps cross the Python/JVM/Arrow boundary.
         .config("spark.sql.session.timeZone", "UTC")
+        # local[*] means driver and executor are the same JVM, so this is
+        # the entire memory budget for the job. Default (1g) is too small
+        # for the sedona join; too large and two jobs running alongside
+        # Redpanda on a 12GB box start swapping. Set per-job via env in
+        # each systemd unit rather than hardcoding one value for both.
+        .config("spark.driver.memory", os.getenv("SPARK_DRIVER_MEMORY", "2g"))
     )
     if with_sedona:
         builder = builder.config(

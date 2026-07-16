@@ -1,0 +1,27 @@
+[Unit]
+Description=San Pedro Bay pipeline - vessel state streaming job
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/san-pedro-bay-pipeline
+Environment=KAFKA_BOOTSTRAP=localhost:9092
+Environment=SCHEMA_REGISTRY_URL=http://localhost:8081
+Environment=LAKEHOUSE_BACKEND=oci
+Environment=OCI_NAMESPACE=ax5rxkwswz5n
+Environment=OCI_REGION=us-sanjose-1
+Environment=LAKEHOUSE_BUCKET=san-pedro-bay-lakehouse
+# Heaviest of the two: sedona join plus the applyInPandasWithState store.
+# 4g here + 3g for positions-silver + 1g Redpanda + OS/docker overhead
+# fits the 12GB Always Free ceiling with some headroom.
+Environment=SPARK_DRIVER_MEMORY=4g
+Environment=JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64
+Environment=PATH=/usr/lib/jvm/java-21-openjdk-arm64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/home/ubuntu/san-pedro-bay-pipeline/.venv/bin/python /home/ubuntu/san-pedro-bay-pipeline/processing/streaming/vessel_state_job.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

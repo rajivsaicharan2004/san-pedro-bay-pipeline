@@ -1,0 +1,35 @@
+services:
+  redpanda:
+    image: redpandadata/redpanda:latest
+    command:
+      - redpanda start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+    ports: ["9092:9092", "8081:8081"]
+    restart: unless-stopped
+  console:
+    image: redpandadata/console:latest
+    environment:
+      KAFKA_BROKERS: redpanda:29092
+    ports: ["8080:8080"]
+    depends_on: [redpanda]
+    restart: unless-stopped
+  producer:
+    build:
+      context: .
+      dockerfile: ingestion/ais_producer/Dockerfile
+    environment:
+      KAFKA_BOOTSTRAP: redpanda:29092
+      SCHEMA_REGISTRY_URL: http://redpanda:8081
+    env_file: .env
+    depends_on: [redpanda]
+    restart: unless-stopped
+
+# No minio/minio-init here: production writes to the real
+# san-pedro-bay-lakehouse bucket in OCI Object Storage (already created by
+# Terraform, infra/oci/storage.tf) via instance principal auth, not a
+# local S3-compatible stand-in. See processing/streaming/avro_kafka_reader.py
+# (LAKEHOUSE_BACKEND=oci) for the Spark side of this.
