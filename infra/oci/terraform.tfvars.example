@@ -1,0 +1,18 @@
+# Copy to terraform.tfvars (gitignored) and fill in with real values from
+# your OCI console / ~/.oci/config.
+
+tenancy_ocid = "ocid1.tenancy.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+user_ocid    = "ocid1.user.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+fingerprint  = "xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx"
+region       = "us-sanjose-1"
+
+# For a solo account with no sub-compartments, this is the same as
+# tenancy_ocid -- everything lives in the root compartment.
+compartment_ocid = "ocid1.tenancy.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Storage -> Object Storage -> Buckets (shown at the top of the page), or:
+#   oci os ns get
+object_storage_namespace = "axxxxxxxxxx"
+
+# curl ifconfig.me (or check whatismyip.com) -- must be a /32, not a range.
+my_ip_cidr = "203.0.113.4/32"

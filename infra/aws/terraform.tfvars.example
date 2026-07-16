@@ -1,0 +1,15 @@
+# Copy to terraform.tfvars (gitignored) and fill in.
+
+aws_region = "us-west-2"
+
+# curl ifconfig.me -- must be a /32, not a range.
+my_ip_cidr = "203.0.113.4/32"
+
+# S3 bucket names are globally unique across ALL of AWS -- pick something
+# that won't collide with someone else's bucket.
+lakehouse_bucket_name = "your-unique-name-lakehouse"
+tfstate_bucket_name   = "your-unique-name-tfstate"
+
+# t3.micro is the default already (variables.tf) -- only override if
+# you've decided to trade Free Tier for arm64 (see compute.tf's comment).
+# instance_type = "t3.micro"

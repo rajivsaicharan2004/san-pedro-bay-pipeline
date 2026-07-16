@@ -2,3 +2,23 @@
 .env
 __pycache__/
 *.pyc
+.pytest_cache/
+processing/geofences/data/
+processing/streaming/data/
+processing/streaming/processing/
+
+# Terraform -- state/plans have resource details, tfvars/backend.hcl have
+# account-specific (OCID/namespace) values neither belongs in git.
+infra/oci/.terraform/
+infra/oci/terraform.tfstate*
+infra/oci/*.tfplan
+infra/oci/crash.log
+infra/oci/terraform.tfvars
+infra/oci/backend.hcl
+infra/oci/retry_apply.log
+infra/aws/.terraform/
+infra/aws/terraform.tfstate*
+infra/aws/*.tfplan
+infra/aws/crash.log
+infra/aws/terraform.tfvars
+infra/aws/backend.hcl

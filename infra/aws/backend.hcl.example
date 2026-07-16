@@ -1,0 +1,18 @@
+# Copy to backend.hcl (gitignored) and fill in the bucket name you
+# actually created. Then: terraform init -backend-config=backend.hcl
+#
+# The tfstate bucket must exist and be versioned before this works --
+# create it manually first (same chicken-and-egg as OCI):
+#   aws s3api create-bucket --bucket spb-pipeline-tfstate --region us-west-2 \
+#     --create-bucket-configuration LocationConstraint=us-west-2
+#   aws s3api put-bucket-versioning --bucket spb-pipeline-tfstate \
+#     --versioning-configuration Status=Enabled
+
+bucket = "spb-pipeline-tfstate"
+key    = "spb-pipeline/terraform.tfstate"
+region = "us-west-2"
+
+# Terraform >=1.10's native S3-backend locking -- no separate DynamoDB
+# table needed (the old recommended pattern). Prevents two concurrent
+# `terraform apply` runs from corrupting state.
+use_lockfile = true

@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import asyncio, json, logging, os, signal
 from datetime import datetime, timezone
+from pathlib import Path
+
 import websockets
-from confluent_kafka import Producer
+from confluent_kafka import SerializingProducer
+from confluent_kafka.schema_registry import SchemaRegistryClient
+from confluent_kafka.schema_registry.avro import AvroSerializer
+from confluent_kafka.serialization import StringSerializer, SerializationContext, MessageField
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,6 +17,8 @@ log = logging.getLogger("ais_producer")
 
 WS_URL = "wss://stream.aisstream.io/v0/stream"
 BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP", "localhost:9092")
+SCHEMA_REGISTRY_URL = os.getenv("SCHEMA_REGISTRY_URL", "http://localhost:8081")
+SCHEMAS_DIR = Path(__file__).parent.parent.parent / "schemas"
 
 TOPIC_MAP = {
     "PositionReport": "ais.raw.positions",
@@ -19,11 +26,36 @@ TOPIC_MAP = {
 }
 DEADLETTER = "ais.deadletter"
 
-producer = Producer({
+schema_registry_client = SchemaRegistryClient({"url": SCHEMA_REGISTRY_URL})
+
+# One AvroSerializer per topic, each bound to that topic's schema -- the
+# deadletter topic deliberately isn't schema-governed, since its whole job
+# is to hold data that didn't conform to anything.
+_avro_serializers = {
+    "ais.raw.positions": AvroSerializer(
+        schema_registry_client,
+        (SCHEMAS_DIR / "position_report_envelope.avsc").read_text(),
+    ),
+    "ais.raw.static": AvroSerializer(
+        schema_registry_client,
+        (SCHEMAS_DIR / "ship_static_data_envelope.avsc").read_text(),
+    ),
+}
+
+
+def _value_serializer(obj: dict, ctx: SerializationContext) -> bytes:
+    if ctx.topic == DEADLETTER:
+        return json.dumps(obj).encode("utf-8")
+    return _avro_serializers[ctx.topic](obj, ctx)
+
+
+producer = SerializingProducer({
     "bootstrap.servers": BOOTSTRAP,
     "enable.idempotence": True,
     "acks": "all",
     "linger.ms": 100,
+    "key.serializer": StringSerializer("utf_8"),
+    "value.serializer": _value_serializer,
 })
 
 def _on_delivery(err, msg):
@@ -50,8 +82,8 @@ def handle_message(raw: str) -> None:
     except json.JSONDecodeError as e:
         producer.produce(
             DEADLETTER,
-            value=json.dumps({"raw": raw, "error": str(e)}).encode(),
-            callback=_on_delivery,
+            value={"raw": raw, "error": str(e)},
+            on_delivery=_on_delivery,
         )
         return
 
@@ -59,9 +91,9 @@ def handle_message(raw: str) -> None:
     env = envelope(msg)
     producer.produce(
         topic,
-        key=key.encode() if key else None,
-        value=json.dumps(env).encode(),
-        callback=_on_delivery,
+        key=key,
+        value=env,
+        on_delivery=_on_delivery,
     )
 
 async def consume_forever() -> None:

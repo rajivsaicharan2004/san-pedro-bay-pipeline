@@ -1,0 +1,18 @@
+websockets
+confluent-kafka[avro]
+python-dotenv
+pytest
+shapely
+pyproj
+geopandas
+requests
+
+# apache-sedona[spark]==1.6.1 has no upper bound on pyspark and will
+# happily pull pyspark 4.x, but Sedona 1.6.1 only ships jars for Spark
+# 3.3/3.4/3.5 -- pin pyspark explicitly or the install silently breaks at
+# runtime, not at install time.
+pyspark==3.5.3
+apache-sedona[spark]==1.6.1
+pyarrow
+delta-spark==3.2.1
+pandera

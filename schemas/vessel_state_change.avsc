@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "VesselStateChange",
+  "namespace": "ais.sanpedrobay",
+  "doc": "Emitted by the stateful vessel state machine (processing/streaming/vessel_state_job.py) to vessel.state.changes. Two kinds of events share this schema: event_type='state_transition' populates from_state/to_state/zone_id (derived_state duplicates to_state for convenience); event_type='discrepancy_flagged'/'discrepancy_cleared' populates derived_state/reported_status instead and leaves from_state/to_state/zone_id null.",
+  "fields": [
+    {"name": "mmsi", "type": "string"},
+    {"name": "event_type", "type": "string", "doc": "state_transition | discrepancy_flagged | discrepancy_cleared"},
+    {"name": "from_state", "type": ["null", "string"], "default": null},
+    {"name": "to_state", "type": ["null", "string"], "default": null},
+    {"name": "zone_id", "type": ["null", "string"], "default": null},
+    {"name": "derived_state", "type": ["null", "string"], "default": null},
+    {"name": "reported_status", "type": ["null", "string"], "default": null},
+    {
+      "name": "transition_time",
+      "type": {"type": "long", "logicalType": "timestamp-millis"}
+    }
+  ]
+}

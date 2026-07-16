@@ -1,0 +1,95 @@
+{
+  "type": "record",
+  "name": "ShipStaticDataEnvelope",
+  "namespace": "ais.sanpedrobay",
+  "doc": "Envelope for an AISStream ShipStaticData (AIS Type 5) message, as produced to ais.raw.static. Field shapes/types derived from real AISStream output, not the AIS spec directly -- see ingestion/ais_producer/producer.py.",
+  "fields": [
+    {"name": "ingested_at", "type": "string", "doc": "UTC ISO8601 timestamp when the producer received this message."},
+    {"name": "source", "type": "string", "default": "aisstream"},
+    {"name": "schema_version", "type": "int", "default": 1},
+    {
+      "name": "payload",
+      "type": {
+        "type": "record",
+        "name": "ShipStaticDataPayload",
+        "fields": [
+          {"name": "MessageType", "type": "string"},
+          {
+            "name": "MetaData",
+            "type": {
+              "type": "record",
+              "name": "MetaData",
+              "fields": [
+                {"name": "MMSI", "type": "long"},
+                {"name": "MMSI_String", "type": "long", "doc": "Despite the name, AISStream emits this as a number, not a string."},
+                {"name": "ShipName", "type": "string"},
+                {"name": "latitude", "type": "double"},
+                {"name": "longitude", "type": "double"},
+                {"name": "time_utc", "type": "string"}
+              ]
+            }
+          },
+          {
+            "name": "Message",
+            "type": {
+              "type": "record",
+              "name": "ShipStaticDataMessage",
+              "fields": [
+                {
+                  "name": "ShipStaticData",
+                  "type": {
+                    "type": "record",
+                    "name": "ShipStaticData",
+                    "fields": [
+                      {"name": "AisVersion", "type": "int"},
+                      {"name": "CallSign", "type": "string"},
+                      {"name": "Destination", "type": "string"},
+                      {
+                        "name": "Dimension",
+                        "type": {
+                          "type": "record",
+                          "name": "Dimension",
+                          "doc": "Distance in meters from the GPS antenna to bow (A), stern (B), port (C) and starboard (D).",
+                          "fields": [
+                            {"name": "A", "type": "int"},
+                            {"name": "B", "type": "int"},
+                            {"name": "C", "type": "int"},
+                            {"name": "D", "type": "int"}
+                          ]
+                        }
+                      },
+                      {"name": "Dte", "type": "boolean"},
+                      {
+                        "name": "Eta",
+                        "type": {
+                          "type": "record",
+                          "name": "Eta",
+                          "fields": [
+                            {"name": "Day", "type": "int"},
+                            {"name": "Hour", "type": "int"},
+                            {"name": "Minute", "type": "int"},
+                            {"name": "Month", "type": "int"}
+                          ]
+                        }
+                      },
+                      {"name": "FixType", "type": "int"},
+                      {"name": "ImoNumber", "type": "long"},
+                      {"name": "MaximumStaticDraught", "type": "double"},
+                      {"name": "MessageID", "type": "int"},
+                      {"name": "Name", "type": "string"},
+                      {"name": "RepeatIndicator", "type": "int"},
+                      {"name": "Spare", "type": "boolean", "doc": "Note: Spare is an int in PositionReport but a boolean here -- a real AISStream inconsistency, confirmed against live data, not a schema bug."},
+                      {"name": "Type", "type": "int"},
+                      {"name": "UserID", "type": "long"},
+                      {"name": "Valid", "type": "boolean"}
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

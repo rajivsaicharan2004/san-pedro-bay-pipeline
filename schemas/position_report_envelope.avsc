@@ -1,0 +1,71 @@
+{
+  "type": "record",
+  "name": "PositionReportEnvelope",
+  "namespace": "ais.sanpedrobay",
+  "doc": "Envelope for an AISStream PositionReport (AIS Type 1/2/3) message, as produced to ais.raw.positions. Field shapes/types derived from real AISStream output, not the AIS spec directly -- see ingestion/ais_producer/producer.py.",
+  "fields": [
+    {"name": "ingested_at", "type": "string", "doc": "UTC ISO8601 timestamp when the producer received this message."},
+    {"name": "source", "type": "string", "default": "aisstream"},
+    {"name": "schema_version", "type": "int", "default": 1},
+    {
+      "name": "payload",
+      "type": {
+        "type": "record",
+        "name": "PositionReportPayload",
+        "fields": [
+          {"name": "MessageType", "type": "string"},
+          {
+            "name": "MetaData",
+            "type": {
+              "type": "record",
+              "name": "MetaData",
+              "fields": [
+                {"name": "MMSI", "type": "long"},
+                {"name": "MMSI_String", "type": "long", "doc": "Despite the name, AISStream emits this as a number, not a string."},
+                {"name": "ShipName", "type": "string"},
+                {"name": "latitude", "type": "double"},
+                {"name": "longitude", "type": "double"},
+                {"name": "time_utc", "type": "string"}
+              ]
+            }
+          },
+          {
+            "name": "Message",
+            "type": {
+              "type": "record",
+              "name": "PositionReportMessage",
+              "fields": [
+                {
+                  "name": "PositionReport",
+                  "type": {
+                    "type": "record",
+                    "name": "PositionReport",
+                    "fields": [
+                      {"name": "Cog", "type": "double", "doc": "Course over ground, degrees."},
+                      {"name": "CommunicationState", "type": "long"},
+                      {"name": "Latitude", "type": "double"},
+                      {"name": "Longitude", "type": "double"},
+                      {"name": "MessageID", "type": "int"},
+                      {"name": "NavigationalStatus", "type": "int"},
+                      {"name": "PositionAccuracy", "type": "boolean"},
+                      {"name": "Raim", "type": "boolean"},
+                      {"name": "RateOfTurn", "type": "int"},
+                      {"name": "RepeatIndicator", "type": "int"},
+                      {"name": "Sog", "type": "double", "doc": "Speed over ground, knots."},
+                      {"name": "Spare", "type": "int"},
+                      {"name": "SpecialManoeuvreIndicator", "type": "int"},
+                      {"name": "Timestamp", "type": "int"},
+                      {"name": "TrueHeading", "type": "int"},
+                      {"name": "UserID", "type": "long"},
+                      {"name": "Valid", "type": "boolean"}
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

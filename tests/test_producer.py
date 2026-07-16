@@ -1,4 +1,3 @@
-import json
 from unittest.mock import patch
 
 from producer import DEADLETTER, envelope, handle_message, route
@@ -48,6 +47,10 @@ def test_handle_message_malformed_json_goes_to_deadletter(mock_producer):
     mock_producer.produce.assert_called_once()
     args, kwargs = mock_producer.produce.call_args
     assert args[0] == DEADLETTER
-    body = json.loads(kwargs["value"])
+    # SerializingProducer.produce() takes a raw object -- the value
+    # serializer (JSON for deadletter, Avro otherwise) runs inside
+    # produce() itself, which is mocked out here, so kwargs["value"] is
+    # still the plain dict, not yet encoded.
+    body = kwargs["value"]
     assert body["raw"] == "not valid json{"
     assert "error" in body

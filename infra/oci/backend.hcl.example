@@ -1,0 +1,24 @@
+# Copy to backend.hcl (gitignored) and fill in your object storage
+# namespace. Then: terraform init -backend-config=backend.hcl
+#
+# The tf-state bucket itself must exist before this works -- create it
+# manually in the console first (Storage -> Object Storage -> Buckets ->
+# Create Bucket, name "tf-state"), and generate a Customer Secret Key
+# (Profile -> Customer Secret Keys) for the access/secret pair below.
+# AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY env vars (or ~/.aws/credentials)
+# are what the S3 backend actually reads -- there's no separate Terraform
+# config field for them.
+
+bucket   = "tf-state"
+key      = "spb-pipeline/terraform.tfstate"
+region   = "us-sanjose-1"
+
+endpoints = {
+  s3 = "https://<namespace>.compat.objectstorage.us-sanjose-1.oraclecloud.com"
+}
+
+skip_credentials_validation = true
+skip_region_validation      = true
+skip_requesting_account_id  = true
+skip_metadata_api_check     = true
+use_path_style              = true
