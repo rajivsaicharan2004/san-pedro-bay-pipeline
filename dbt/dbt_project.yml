@@ -1,0 +1,26 @@
+name: 'spb_pipeline'
+version: '1.0.0'
+config-version: 2
+
+profile: 'spb_pipeline'
+
+model-paths: ["models"]
+clean-targets: ["target"]
+
+# Local mirror of the OCI lakehouse bucket -- DuckDB's httpfs can't use
+# instance principal auth (only S3-style static keys, which loops back to
+# the Customer Secret Key that's broken on this tenancy), so
+# infra/oci/scripts/sync_lakehouse.sh pulls the Delta tables down to this
+# path first via `oci os object sync --auth instance_principal` (the
+# proven-working native auth path), and dbt reads the local copy.
+vars:
+  lakehouse_sync_dir: /home/ubuntu/lakehouse_sync
+
+models:
+  spb_pipeline:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    gold:
+      +materialized: table

@@ -1,5 +1,5 @@
 [Unit]
-Description=San Pedro Bay pipeline - vessel state streaming job
+Description=San Pedro Bay pipeline - ship static data ingest
 After=docker.service
 Requires=docker.service
 
@@ -13,13 +13,13 @@ Environment=LAKEHOUSE_BACKEND=oci
 Environment=OCI_NAMESPACE=ax5rxkwswz5n
 Environment=OCI_REGION=us-sanjose-1
 Environment=LAKEHOUSE_BUCKET=san-pedro-bay-lakehouse
-# Heaviest of the three: sedona join plus the applyInPandasWithState
-# store. 4g here + 3g positions-silver + 1g ship-static + 1g Redpanda +
-# OS/docker overhead fits the 12GB Always Free ceiling with some headroom.
-Environment=SPARK_DRIVER_MEMORY=4g
+# No sedona join, no state store -- straight Kafka-to-Delta, lightest of
+# the three jobs. 1g here + positions-silver's 3g + vessel-state's 4g +
+# Redpanda's 1g fits the 12GB Always Free ceiling with headroom.
+Environment=SPARK_DRIVER_MEMORY=1g
 Environment=JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64
 Environment=PATH=/usr/lib/jvm/java-21-openjdk-arm64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=/home/ubuntu/san-pedro-bay-pipeline/.venv/bin/python /home/ubuntu/san-pedro-bay-pipeline/processing/streaming/vessel_state_job.py
+ExecStart=/home/ubuntu/san-pedro-bay-pipeline/.venv/bin/python /home/ubuntu/san-pedro-bay-pipeline/processing/streaming/ship_static_job.py
 Restart=on-failure
 RestartSec=10
 

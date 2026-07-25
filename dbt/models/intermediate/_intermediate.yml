@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: int_zones
+    columns:
+      - name: zone_id
+        tests: [unique, not_null]
+      - name: zone_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['anchorage', 'berth', 'harbor']
+
+  - name: int_vessel_sessions
+    columns:
+      - name: session_id
+        tests: [unique, not_null]
+      - name: mmsi
+        tests: [not_null]
+      - name: state
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['UNDERWAY', 'AT_ANCHOR', 'MOORED']

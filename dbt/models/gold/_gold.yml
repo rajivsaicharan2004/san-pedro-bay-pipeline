@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: dim_vessels
+    columns:
+      - name: mmsi
+        tests: [unique, not_null]
+
+  - name: fct_berth_visits
+    columns:
+      - name: berth_visit_id
+        tests: [unique, not_null]
+      - name: mmsi
+        tests:
+          # warn, not error: a vessel can report a position/state before
+          # AISStream has ever relayed its (much less frequent)
+          # ShipStaticData -- a missing dim_vessels row is expected
+          # occasionally, not a broken build.
+          - relationships:
+              arguments:
+                to: ref('dim_vessels')
+                field: mmsi
+              config:
+                severity: warn
+      - name: berth_id
+        tests: [not_null]
+
+  - name: fct_anchorage_dwell
+    columns:
+      - name: anchorage_dwell_id
+        tests: [unique, not_null]
+      - name: mmsi
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_vessels')
+                field: mmsi
+              config:
+                severity: warn
+      - name: anchorage_id
+        tests: [not_null]
+
+  - name: fct_vessel_activity_daily
+    columns:
+      - name: mmsi
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_vessels')
+                field: mmsi
+              config:
+                severity: warn
+      - name: state
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['UNDERWAY', 'AT_ANCHOR', 'MOORED']
+
+  - name: fct_discrepancy_events
+    columns:
+      - name: discrepancy_event_id
+        tests: [unique, not_null]
+      - name: mmsi
+        tests: [not_null]
+      - name: derived_state
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['UNDERWAY', 'AT_ANCHOR', 'MOORED']

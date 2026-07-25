@@ -13,9 +13,10 @@ Environment=LAKEHOUSE_BACKEND=oci
 Environment=OCI_NAMESPACE=ax5rxkwswz5n
 Environment=OCI_REGION=us-sanjose-1
 Environment=LAKEHOUSE_BUCKET=san-pedro-bay-lakehouse
-# Sedona join is the heavier of the two jobs' non-Delta work; 3g leaves
-# room for vessel-state's 4g + Redpanda's 1g + OS/docker overhead within
-# the 12GB Always Free ceiling (infra/oci/variables.tf).
+# Sedona join is heavier than ship-static's straight passthrough; 3g
+# leaves room for vessel-state's 4g + ship-static's 1g + Redpanda's 1g +
+# OS/docker overhead within the 12GB Always Free ceiling
+# (infra/oci/variables.tf).
 Environment=SPARK_DRIVER_MEMORY=3g
 Environment=JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64
 Environment=PATH=/usr/lib/jvm/java-21-openjdk-arm64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

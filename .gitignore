@@ -7,6 +7,14 @@ processing/geofences/data/
 processing/streaming/data/
 processing/streaming/processing/
 
+# dbt -- generated database, logs, and compiled artifacts, not source.
+dbt/.venv/
+dbt/target/
+dbt/logs/
+dbt/*.duckdb
+dbt/*.duckdb.wal
+dbt/.user.yml
+
 # Terraform -- state/plans have resource details, tfvars/backend.hcl have
 # account-specific (OCID/namespace) values neither belongs in git.
 infra/oci/.terraform/

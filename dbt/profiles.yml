@@ -1,0 +1,10 @@
+# No secrets in here (DuckDB is a local file + the delta plugin reads
+# local paths only), safe to commit -- unlike infra/oci's backend.hcl.
+spb_pipeline:
+  target: prod
+  outputs:
+    prod:
+      type: duckdb
+      path: /home/ubuntu/spb_gold.duckdb
+      plugins:
+        - module: delta

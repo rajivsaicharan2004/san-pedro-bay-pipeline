@@ -42,10 +42,25 @@ if [ ! -f .env ]; then
   echo "Wrote empty .env -- fill in AISSTREAM_API_KEY (chmod 600 .env) before starting the producer."
 fi
 
-sudo cp infra/oci/systemd/spb-positions-silver.service infra/oci/systemd/spb-vessel-state.service /etc/systemd/system/
+# Dedicated venv for the oci CLI (needed by sync_lakehouse.sh) -- kept
+# separate from .venv so a Spark dependency bump can never break the one
+# thing that has to keep working for dbt to see fresh data.
+python3.12 -m venv "$HOME/.oci-cli-venv"
+"$HOME/.oci-cli-venv/bin/pip" install --upgrade pip
+"$HOME/.oci-cli-venv/bin/pip" install oci-cli
+
+# dbt gets its own venv too -- dbt-duckdb/deltalake have nothing to do
+# with the Spark jobs' dependency set.
+python3.12 -m venv dbt/.venv
+dbt/.venv/bin/pip install --upgrade pip
+dbt/.venv/bin/pip install -r dbt/requirements.txt
+
+sudo cp infra/oci/systemd/spb-positions-silver.service infra/oci/systemd/spb-vessel-state.service infra/oci/systemd/spb-ship-static.service infra/oci/systemd/spb-lakehouse-sync.service infra/oci/systemd/spb-lakehouse-sync.timer /etc/systemd/system/
 sudo systemctl daemon-reload
+sudo systemctl enable --now spb-lakehouse-sync.timer
 
 echo "Done. Remaining manual steps (in order, after filling in .env):"
 echo "  1. Log out and back in (or run 'newgrp docker') for docker group membership to take effect."
 echo "  2. cd $REPO_DIR && docker compose -f docker-compose.prod.yml up -d"
-echo "  3. sudo systemctl enable --now spb-positions-silver spb-vessel-state"
+echo "  3. sudo systemctl enable --now spb-positions-silver spb-vessel-state spb-ship-static"
+echo "  4. Once data is flowing: ./dbt/run_dbt.sh"

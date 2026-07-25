@@ -1,0 +1,54 @@
+version: 2
+
+sources:
+  - name: lakehouse
+    description: >
+      Delta tables written by the Spark streaming jobs
+      (processing/streaming/), read here from a local mirror of the OCI
+      Object Storage bucket rather than directly over the network -- see
+      dbt_project.yml for why.
+    config:
+      plugin: delta
+      materialization: view
+    tables:
+      - name: positions_silver
+        meta:
+          delta_table_path: "{{ var('lakehouse_sync_dir') }}/positions_silver"
+        loaded_at_field: ingested_at
+        # Positions arrive continuously (2s-3min depending on vessel
+        # behavior) and the job micro-batches every 30s -- 15/30 minute
+        # thresholds mostly measure sync-timer lag, not pipeline health.
+        freshness:
+          warn_after: {count: 15, period: minute}
+          error_after: {count: 30, period: minute}
+        columns:
+          - name: mmsi
+            tests: [not_null]
+          - name: event_time
+            tests: [not_null]
+
+      - name: vessel_state_changes
+        meta:
+          delta_table_path: "{{ var('lakehouse_sync_dir') }}/vessel_state_changes"
+        loaded_at_field: transition_time
+        freshness:
+          warn_after: {count: 15, period: minute}
+          error_after: {count: 30, period: minute}
+        columns:
+          - name: mmsi
+            tests: [not_null]
+
+      - name: ship_static
+        meta:
+          delta_table_path: "{{ var('lakehouse_sync_dir') }}/ship_static"
+        loaded_at_field: ingested_at
+        # Ships broadcast static data far less often than position reports
+        # (minutes to hours between messages, not seconds) -- the same
+        # 15/30 minute bar used for positions would false-positive
+        # constantly here.
+        freshness:
+          warn_after: {count: 60, period: minute}
+          error_after: {count: 180, period: minute}
+        columns:
+          - name: mmsi
+            tests: [not_null]

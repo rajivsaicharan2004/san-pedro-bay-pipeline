@@ -1,0 +1,9 @@
+[Unit]
+Description=Sync OCI lakehouse bucket to local disk for dbt-duckdb
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/san-pedro-bay-pipeline
+ExecStart=/home/ubuntu/san-pedro-bay-pipeline/infra/oci/scripts/sync_lakehouse.sh
