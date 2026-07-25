@@ -55,7 +55,21 @@ python3.12 -m venv dbt/.venv
 dbt/.venv/bin/pip install --upgrade pip
 dbt/.venv/bin/pip install -r dbt/requirements.txt
 
-sudo cp infra/oci/systemd/spb-positions-silver.service infra/oci/systemd/spb-vessel-state.service infra/oci/systemd/spb-ship-static.service infra/oci/systemd/spb-lakehouse-sync.service infra/oci/systemd/spb-lakehouse-sync.timer /etc/systemd/system/
+# Generates dbt/target/manifest.json, which @dbt_assets (orchestration/)
+# reads at a fixed path -- `dbt parse` only reads project files, it
+# doesn't open a warehouse connection, so this works before
+# lakehouse_sync has ever run and before any real data exists.
+dbt/.venv/bin/dbt parse --project-dir dbt --profiles-dir dbt
+
+# Dagster gets its own venv too, same reasoning as dbt's.
+python3.12 -m venv orchestration/.venv
+orchestration/.venv/bin/pip install --upgrade pip
+orchestration/.venv/bin/pip install -r orchestration/requirements.txt
+
+mkdir -p "$HOME/dagster_home"
+touch "$HOME/dagster_home/dagster.yaml"
+
+sudo cp infra/oci/systemd/spb-positions-silver.service infra/oci/systemd/spb-vessel-state.service infra/oci/systemd/spb-ship-static.service infra/oci/systemd/spb-lakehouse-sync.service infra/oci/systemd/spb-lakehouse-sync.timer infra/oci/systemd/spb-dagster-daemon.service infra/oci/systemd/spb-dagster-webserver.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now spb-lakehouse-sync.timer
 
@@ -63,4 +77,6 @@ echo "Done. Remaining manual steps (in order, after filling in .env):"
 echo "  1. Log out and back in (or run 'newgrp docker') for docker group membership to take effect."
 echo "  2. cd $REPO_DIR && docker compose -f docker-compose.prod.yml up -d"
 echo "  3. sudo systemctl enable --now spb-positions-silver spb-vessel-state spb-ship-static"
-echo "  4. Once data is flowing: ./dbt/run_dbt.sh"
+echo "  4. Once data is flowing: ./dbt/run_dbt.sh (confirms dbt build is green before trusting Dagster to run it)"
+echo "  5. sudo systemctl enable --now spb-dagster-daemon spb-dagster-webserver"
+echo "  6. Dagit: http://<instance_public_ip>:3000 (already open to your IP in the security list)"

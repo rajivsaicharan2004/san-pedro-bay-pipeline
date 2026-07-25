@@ -1,0 +1,20 @@
+[Unit]
+Description=San Pedro Bay pipeline - Dagster webserver (Dagit)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/san-pedro-bay-pipeline/orchestration
+Environment=DAGSTER_HOME=/home/ubuntu/dagster_home
+Environment=LAKEHOUSE_SYNC_DIR=/home/ubuntu/lakehouse_sync
+# 0.0.0.0:3000 to match the security list rule already scoped to
+# my_ip_cidr for Dagit (infra/oci/network.tf) -- 127.0.0.1 (the default)
+# would bind Dagit to a port nothing outside the box can reach.
+ExecStart=/home/ubuntu/san-pedro-bay-pipeline/orchestration/.venv/bin/dagster-webserver -w workspace.yaml -h 0.0.0.0 -p 3000
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

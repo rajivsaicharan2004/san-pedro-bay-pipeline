@@ -15,6 +15,11 @@ dbt/*.duckdb
 dbt/*.duckdb.wal
 dbt/.user.yml
 
+# Dagster -- its own venv, plus DAGSTER_HOME lives outside the repo
+# entirely (/home/ubuntu/dagster_home on the instance) so no run/event
+# storage ever ends up in here.
+orchestration/.venv/
+
 # Terraform -- state/plans have resource details, tfvars/backend.hcl have
 # account-specific (OCID/namespace) values neither belongs in git.
 infra/oci/.terraform/

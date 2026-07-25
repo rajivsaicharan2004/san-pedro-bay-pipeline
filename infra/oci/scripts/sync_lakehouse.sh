@@ -18,3 +18,8 @@ mkdir -p "$DEST_DIR"
   --bucket-name "$BUCKET" \
   --dest-dir "$DEST_DIR" \
   --auth instance_principal
+
+# Dagster's sensor (orchestration/) polls this file's mtime rather than
+# scanning every Delta file under $DEST_DIR to decide whether new data
+# has landed -- one stat() call instead of walking the whole mirror.
+touch "$DEST_DIR/.last_synced"

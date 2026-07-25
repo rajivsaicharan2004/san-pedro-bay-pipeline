@@ -1,0 +1,21 @@
+[Unit]
+Description=San Pedro Bay pipeline - Dagster daemon (schedules + sensors)
+After=docker.service spb-lakehouse-sync.timer
+Requires=docker.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/san-pedro-bay-pipeline/orchestration
+Environment=DAGSTER_HOME=/home/ubuntu/dagster_home
+Environment=LAKEHOUSE_SYNC_DIR=/home/ubuntu/lakehouse_sync
+# The daemon is what actually fires lakehouse_sync_sensor and the daily
+# backstop schedule -- without it running, those are just definitions
+# that never execute, and `dbt build` only ever runs if someone
+# `dagster job launch`s it by hand.
+ExecStart=/home/ubuntu/san-pedro-bay-pipeline/orchestration/.venv/bin/dagster-daemon run -w workspace.yaml
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
