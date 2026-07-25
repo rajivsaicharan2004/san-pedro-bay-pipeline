@@ -20,6 +20,10 @@ dbt/.user.yml
 # storage ever ends up in here.
 orchestration/.venv/
 
+# Streamlit -- local secrets.toml is for testing only; the real deploy
+# uses Streamlit Community Cloud's own Secrets UI, never a committed file.
+dashboard/.streamlit/secrets.toml
+
 # Terraform -- state/plans have resource details, tfvars/backend.hcl have
 # account-specific (OCID/namespace) values neither belongs in git.
 infra/oci/.terraform/

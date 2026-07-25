@@ -80,3 +80,8 @@ echo "  3. sudo systemctl enable --now spb-positions-silver spb-vessel-state spb
 echo "  4. Once data is flowing: ./dbt/run_dbt.sh (confirms dbt build is green before trusting Dagster to run it)"
 echo "  5. sudo systemctl enable --now spb-dagster-daemon spb-dagster-webserver"
 echo "  6. Dagit: http://<instance_public_ip>:3000 (already open to your IP in the security list)"
+echo "  7. ./infra/oci/scripts/create_dashboard_par.sh -- one-time, prints the public URL"
+echo "     for the Stage 5 dashboard. Then deploy dashboard/streamlit_app.py on"
+echo "     Streamlit Community Cloud (share.streamlit.io) and paste that URL into"
+echo "     the app's Secrets as PAR_URL = \"...\" -- this step is a manual web console"
+echo "     action tied to your own Streamlit account, nothing here can do it for you."
