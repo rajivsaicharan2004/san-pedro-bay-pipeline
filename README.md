@@ -1,5 +1,34 @@
 # San Pedro Bay Pipeline
 
+## Status
+
+Pipeline (AIS ingestion -> Kafka -> Spark streaming state derivation ->
+Delta lakehouse -> dbt -> Dagster-orchestrated dashboard export -> Streamlit
+dashboard) is built, tested (`pytest`, 26/26 passing), and deployed. All
+stages run end-to-end against a live AIS feed, not just in tests.
+
+**Deployment: cloud first, then local, not local instead of cloud.**
+`infra/oci/` is complete, applied Terraform IaC for OCI's Always Free tier
+(compute, IAM, networking, S3-compatible remote state -- see "Design
+decisions: infrastructure" below). It was never actually *running*
+pipeline workloads on OCI, though: the specific free shape it targets
+(`VM.Standard.A1.Flex`, 2 OCPU/12GB) is the most contested resource in the
+Always Free pool, and `infra/oci/scripts/retry_apply.sh` retried against it
+across multiple multi-day windows without OCI ever granting capacity.
+Paying for a non-free shape wasn't the direction taken, so `infra/local/`
+stands up the identical pipeline persistently on a Mac via launchd instead
+(launchd plists in place of systemd units, a Cloudflare quick tunnel in
+place of the OCI security-list-gated public IP, dbt pointed at a local
+`dev` target). The two modes share one codebase, switched via env vars
+(`DBT_TARGET`/`DBT_VARS`, `SNAPSHOT_OUTPUT_FILE`) -- not a fork. If OCI
+capacity ever comes through, `infra/oci/` is ready to `terraform apply`
+against as-is.
+
+**Outstanding: the 24-hour continuous-run validation.** The local launchd
+stack is up and currently ingesting live AIS data, but hasn't yet
+accumulated a full 24h of continuous runtime -- see "Validation" below for
+what's blocked on that and why.
+
 ## Design decisions
 
 **Debounce is time-based (M minutes), not observation-count-based (N
