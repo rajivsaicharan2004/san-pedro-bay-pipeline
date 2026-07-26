@@ -96,21 +96,32 @@ def _state_to_row(state: VesselState) -> tuple:
 
 
 def _row_to_state(row) -> VesselState:
+    # group_state.update() (below) stores exactly the plain tuple
+    # _state_to_row returns -- group_state.get hands that same plain
+    # tuple back, not a namedtuple/Row, so this has to unpack
+    # positionally in _state_to_row's exact field order rather than by
+    # attribute name.
+    (
+        mmsi, current_state, state_entry_time, current_zone_id,
+        candidate_state, candidate_since, candidate_zone_id,
+        last_lat, last_lon, last_sog, last_position_time,
+        reported_status, discrepancy_since, discrepancy_flagged,
+    ) = row
     return VesselState(
-        mmsi=row.mmsi,
-        current_state=row.current_state,
-        state_entry_time=row.state_entry_time,
-        current_zone_id=row.current_zone_id,
-        candidate_state=row.candidate_state,
-        candidate_since=row.candidate_since,
-        candidate_zone_id=row.candidate_zone_id,
-        last_lat=row.last_lat,
-        last_lon=row.last_lon,
-        last_sog=row.last_sog,
-        last_position_time=row.last_position_time,
-        reported_status=row.reported_status,
-        discrepancy_since=row.discrepancy_since,
-        discrepancy_flagged=row.discrepancy_flagged,
+        mmsi=mmsi,
+        current_state=current_state,
+        state_entry_time=state_entry_time,
+        current_zone_id=current_zone_id,
+        candidate_state=candidate_state,
+        candidate_since=candidate_since,
+        candidate_zone_id=candidate_zone_id,
+        last_lat=last_lat,
+        last_lon=last_lon,
+        last_sog=last_sog,
+        last_position_time=last_position_time,
+        reported_status=reported_status,
+        discrepancy_since=discrepancy_since,
+        discrepancy_flagged=discrepancy_flagged,
     )
 
 

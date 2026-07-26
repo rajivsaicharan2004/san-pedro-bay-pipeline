@@ -1,2 +1,5 @@
+# pyarrow: deltalake's read path needs it explicitly (deltalake[pyarrow])
+# -- found by actually running dbt build locally, not by inspection; it
+# silently doesn't matter until you try to read a Delta table.
 dbt-duckdb==1.10.1
-deltalake
+deltalake[pyarrow]
