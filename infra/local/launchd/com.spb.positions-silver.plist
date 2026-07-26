@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.spb.positions-silver</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/jo/projects/san-pedro-bay-pipeline/.venv/bin/python</string>
+        <string>processing/streaming/positions_silver_job.py</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/jo/projects/san-pedro-bay-pipeline</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>JAVA_HOME</key>
+        <string>/opt/homebrew/opt/openjdk@17</string>
+        <key>PYSPARK_PYTHON</key>
+        <string>/Users/jo/projects/san-pedro-bay-pipeline/.venv/bin/python</string>
+        <key>PYSPARK_DRIVER_PYTHON</key>
+        <string>/Users/jo/projects/san-pedro-bay-pipeline/.venv/bin/python</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/jo/projects/san-pedro-bay-pipeline/processing/streaming</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/opt/openjdk@17/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>15</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/jo/spb_local/logs/positions_silver.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/jo/spb_local/logs/positions_silver.log</string>
+</dict>
+</plist>

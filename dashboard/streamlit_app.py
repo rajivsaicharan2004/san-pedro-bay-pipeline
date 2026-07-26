@@ -1,42 +1,60 @@
 """Minimal Stage 5 dashboard skeleton: ships at anchor right now.
 
-Runs on Streamlit Community Cloud, which is not this pipeline's OCI
-instance and can't use instance principal auth or read the local DuckDB
-file -- it fetches a small JSON snapshot from a Pre-Authenticated Request
-(a public, read-only URL for exactly one object) that
-orchestration/spb_orchestration/dashboard_export.py keeps overwriting.
-See infra/oci/scripts/create_dashboard_par.sh for how that URL is created.
+Two ways to get the snapshot, both produced by
+orchestration/spb_orchestration/dashboard_export.py:
+
+- SNAPSHOT_FILE secret set: this app and the pipeline are running on the
+  same machine (a local persistent deployment) -- just read the file
+  directly, no network hop needed.
+- PAR_URL secret set instead: this app is on Streamlit Community Cloud,
+  which is not the pipeline's box and can't read its local DuckDB file or
+  use instance principal auth -- fetches a small JSON snapshot from a
+  Pre-Authenticated Request (a public, read-only URL for exactly one
+  object). See infra/oci/scripts/create_dashboard_par.sh.
 """
+import json
+from pathlib import Path
+
 import pandas as pd
 import requests
 import streamlit as st
 
 st.set_page_config(page_title="San Pedro Bay -- Ships at Anchor", page_icon="⚓")
 
+SNAPSHOT_FILE = st.secrets.get("SNAPSHOT_FILE", "")
 PAR_URL = st.secrets.get("PAR_URL", "")
 
 
 @st.cache_data(ttl=60)
-def fetch_snapshot(url: str) -> dict:
+def fetch_snapshot_from_url(url: str) -> dict:
     response = requests.get(url, timeout=10)
     response.raise_for_status()
     return response.json()
 
 
+@st.cache_data(ttl=15)
+def read_snapshot_from_file(path: str) -> dict:
+    return json.loads(Path(path).read_text())
+
+
 st.title("⚓ Ships at Anchor -- San Pedro Bay")
 
-if not PAR_URL:
+if not SNAPSHOT_FILE and not PAR_URL:
     st.error(
-        "No PAR_URL configured. Add it to this app's Secrets in Streamlit "
-        "Community Cloud (Settings -> Secrets): `PAR_URL = \"https://...\"` "
-        "-- see infra/oci/scripts/create_dashboard_par.sh."
+        "No data source configured. Add either `SNAPSHOT_FILE = \"/path/to/snapshot.json\"` "
+        "(local deployment) or `PAR_URL = \"https://...\"` (Streamlit Community Cloud) "
+        "to this app's Secrets."
     )
     st.stop()
 
 try:
-    snapshot = fetch_snapshot(PAR_URL)
-except requests.RequestException as e:
-    st.error(f"Couldn't fetch the snapshot: {e}")
+    snapshot = (
+        read_snapshot_from_file(SNAPSHOT_FILE)
+        if SNAPSHOT_FILE
+        else fetch_snapshot_from_url(PAR_URL)
+    )
+except (OSError, requests.RequestException) as e:
+    st.error(f"Couldn't read the snapshot: {e}")
     st.stop()
 
 ships = snapshot.get("ships_at_anchor", [])

@@ -9,6 +9,7 @@ already declared as dbt source freshness in dbt/models/staging/_sources.yml
 -- same numbers, so Dagster's asset health view and `dbt source freshness`
 never disagree about what "stale" means for the same table.
 """
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -19,6 +20,15 @@ REPO_ROOT = Path(__file__).parent.parent.parent.resolve()
 DBT_PROJECT_DIR = REPO_ROOT / "dbt"
 DBT_MANIFEST_PATH = DBT_PROJECT_DIR / "target" / "manifest.json"
 DBT_EXECUTABLE = str(DBT_PROJECT_DIR / ".venv" / "bin" / "dbt")
+
+# "prod" (default) reads the OCI lakehouse_sync mirror via instance
+# principal, per dbt/profiles.yml. "dev" queries the docker-compose MinIO
+# stand-in directly over S3 -- no cloud account of any kind involved, for
+# running this whole pipeline persistently on a local machine instead of
+# a cloud instance. DBT_VARS carries dev's lakehouse_sync_dir override
+# (an s3:// URI in that mode, not a filesystem path).
+DBT_TARGET = os.getenv("DBT_TARGET", "prod")
+DBT_VARS = os.getenv("DBT_VARS", "")
 
 STAGING_FRESHNESS_POLICIES = {
     "stg_positions_silver": FreshnessPolicy.time_window(
@@ -51,7 +61,10 @@ class SPBDagsterDbtTranslator(DagsterDbtTranslator):
     dagster_dbt_translator=SPBDagsterDbtTranslator(),
 )
 def spb_dbt_assets(context: AssetExecutionContext, dbt: DbtCliResource):
-    yield from dbt.cli(["build"], context=context).stream()
+    args = ["build", "--target", DBT_TARGET]
+    if DBT_VARS:
+        args += ["--vars", DBT_VARS]
+    yield from dbt.cli(args, context=context).stream()
 
 
 dbt_resource = DbtCliResource(

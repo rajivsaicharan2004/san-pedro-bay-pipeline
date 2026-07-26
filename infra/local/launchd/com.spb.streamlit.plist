@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.spb.streamlit</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/jo/projects/san-pedro-bay-pipeline/dashboard/.venv/bin/streamlit</string>
+        <string>run</string>
+        <string>streamlit_app.py</string>
+        <string>--server.headless</string>
+        <string>true</string>
+        <string>--server.port</string>
+        <string>8501</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/jo/projects/san-pedro-bay-pipeline/dashboard</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/jo/spb_local/logs/streamlit.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/jo/spb_local/logs/streamlit.log</string>
+</dict>
+</plist>

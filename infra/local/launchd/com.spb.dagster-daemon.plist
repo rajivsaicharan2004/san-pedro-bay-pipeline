@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.spb.dagster-daemon</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/jo/projects/san-pedro-bay-pipeline/orchestration/.venv/bin/dagster-daemon</string>
+        <string>run</string>
+        <string>-w</string>
+        <string>workspace.yaml</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/jo/projects/san-pedro-bay-pipeline/orchestration</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>DAGSTER_HOME</key>
+        <string>/Users/jo/spb_local/dagster_home</string>
+        <key>LAKEHOUSE_SYNC_DIR</key>
+        <string>/Users/jo/spb_local/lakehouse_marker</string>
+        <key>DBT_TARGET</key>
+        <string>dev</string>
+        <key>DBT_VARS</key>
+        <string>{lakehouse_sync_dir: s3://san-pedro-bay-lakehouse}</string>
+        <key>DUCKDB_PATH</key>
+        <string>/Users/jo/projects/san-pedro-bay-pipeline/dbt/dev_gold.duckdb</string>
+        <key>SNAPSHOT_OUTPUT_FILE</key>
+        <string>/Users/jo/spb_local/dashboard_data/ships_at_anchor_now.json</string>
+        <key>AWS_ACCESS_KEY_ID</key>
+        <string>minioadmin</string>
+        <key>AWS_SECRET_ACCESS_KEY</key>
+        <string>minioadmin</string>
+        <key>AWS_ENDPOINT_URL</key>
+        <string>http://localhost:9000</string>
+        <key>AWS_ALLOW_HTTP</key>
+        <string>true</string>
+        <key>AWS_REGION</key>
+        <string>us-east-1</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>15</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/jo/spb_local/logs/dagster_daemon.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/jo/spb_local/logs/dagster_daemon.log</string>
+</dict>
+</plist>
