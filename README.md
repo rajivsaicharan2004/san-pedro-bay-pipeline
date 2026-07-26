@@ -83,6 +83,8 @@ ports (8080, 9092, 3000) to `my_ip_cidr` alone, with egress left
 unrestricted since nothing is gained by locking down apt/docker pulls or
 the outbound AISStream websocket.
 
+**The deployment target is a local machine (launchd), not the OCI instance the rest of this section describes.** OCI's A1.Flex Always Free capacity never landed after multiple multi-day retry windows, and paying for a non-free shape (`infra/oci/`'s architecture would otherwise transfer unchanged -- same bucket, same IAM, just a different `compute.tf` shape) wasn't the direction taken. `infra/local/` runs the identical pipeline persistently on a Mac instead: launchd plists standing in for the systemd units, dbt pointed at a `dev` target that reads the docker-compose MinIO stand-in directly over S3 instead of syncing from OCI via instance principal, and a Cloudflare quick tunnel standing in for the OCI security-list-gated public IP. `orchestration/spb_orchestration/assets.py` and `dashboard_export.py` pick between the two modes via env vars (`DBT_TARGET`/`DBT_VARS`, `SNAPSHOT_OUTPUT_FILE`) rather than being two separate codebases. The real tradeoff, not a hidden one: a Mac isn't a server -- it stops if the lid closes, it sleeps, it reboots -- durability the cloud deployment wouldn't have had to think about at all.
+
 ## Validation: derived state vs. AIS-reported status
 
 The vessel state machine (`processing/streaming/vessel_state_job.py`) derives
