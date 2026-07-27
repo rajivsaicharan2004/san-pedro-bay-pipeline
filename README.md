@@ -5,11 +5,12 @@ Beach complex and tells you, right now, which ones are at anchor, moored,
 or underway — built and running end-to-end against a live AIS feed, not a
 toy demo.
 
-**🔴 Live dashboard:** https://suse-meditation-aims-mailed.trycloudflare.com
-(served off a Cloudflare quick tunnel from the local deployment described
-below — the URL is randomly regenerated on every restart, so if it's down
-or 404ing, the tunnel has recycled; see the screenshot in
-[Usage](#-see-it-in-action) for what it looks like).
+**🔴 Live dashboard:** https://playpen-wreckage-abiding.ngrok-free.dev
+(a reserved ngrok domain tunneling to the local deployment described
+below — stable across restarts, unlike a quick-tunnel URL. If it's not
+loading, some networks/routers block ngrok domains by reputation; see the
+screenshot in [Usage](#-see-it-in-action) for what it looks like either
+way).
 
 ## 🌟 Highlights
 

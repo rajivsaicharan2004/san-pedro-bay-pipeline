@@ -4,18 +4,27 @@
 <dict>
     <key>Label</key>
     <string>com.spb.tunnel</string>
-    <!-- Cloudflare "quick tunnel": no account or DNS setup needed, but
-         the public URL is randomly generated on each start -- it WILL
-         change across restarts/reboots, unlike a real domain. Check
-         /Users/jo/spb_local/logs/tunnel.log for the current URL after
-         (re)starting. -->
+    <!-- ngrok reserved domain: unlike the Cloudflare quick tunnel this
+         replaced, the URL is stable across restarts/reboots -- always
+         https://playpen-wreckage-abiding.ngrok-free.dev. Requires the
+         authtoken already saved to
+         ~/Library/Application Support/ngrok/ngrok.yml (ngrok config
+         add-authtoken ...) and the domain reserved on the ngrok account
+         (dashboard.ngrok.com/domains). -->
     <key>ProgramArguments</key>
     <array>
-        <string>/opt/homebrew/bin/cloudflared</string>
-        <string>tunnel</string>
-        <string>--url</string>
-        <string>http://localhost:8501</string>
+        <string>/opt/homebrew/bin/ngrok</string>
+        <string>http</string>
+        <string>--url=https://playpen-wreckage-abiding.ngrok-free.dev</string>
+        <string>8501</string>
+        <string>--log=stdout</string>
+        <string>--log-format=logfmt</string>
     </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/jo</string>
+    </dict>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
