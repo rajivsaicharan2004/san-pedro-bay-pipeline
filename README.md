@@ -5,6 +5,12 @@ Beach complex and tells you, right now, which ones are at anchor, moored,
 or underway — built and running end-to-end against a live AIS feed, not a
 toy demo.
 
+**🔴 Live dashboard:** https://infrared-refined-tribes-zinc.trycloudflare.com
+(served off a Cloudflare quick tunnel from the local deployment described
+below — the URL is randomly regenerated on every restart, so if it's down
+or 404ing, the tunnel has recycled; see the screenshot in
+[Usage](#-see-it-in-action) for what it looks like).
+
 ## 🌟 Highlights
 
 - **Live, not simulated.** AIS ingestion → Kafka → Spark streaming state
