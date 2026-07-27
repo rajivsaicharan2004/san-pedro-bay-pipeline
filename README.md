@@ -21,10 +21,16 @@ or 404ing, the tunnel has recycled; see the screenshot in
   as the streaming checkpoint, a debounce window tuned to how AIS actually
   reports (not a naive N-observations count), and a validation script that
   checks derived vessel state against AIS's own self-reported status.
-- **Infra that survives reality not going to plan.** Terraform-provisioned
-  OCI free-tier infrastructure, plus a documented pivot to a persistent
-  local (launchd) deployment when that free-tier capacity never came
-  through — one codebase, switched by env var, not a fork.
+- **Cloud deployment: built and correct, not just attempted.** Complete,
+  applied Terraform IaC for OCI's Always Free tier (compute, IAM,
+  networking, remote state) — ready to run as-is. The only reason it isn't
+  the live deployment is OCI never granting capacity for the free-tier
+  shape it targets, a resource-availability problem on OCI's side, not a
+  gap in the infrastructure code.
+- **So the pipeline runs persistently anyway.** A local (launchd)
+  deployment stands in for the cloud instance right now — same codebase,
+  switched via env var, not a fork — which is what's actually serving the
+  live dashboard above.
 - **Tested:** `pytest`, 26/26 passing.
 
 ## ℹ️ Overview
@@ -41,10 +47,14 @@ anchor right now.
 
 It's built by [Rajiv Sai Charan](https://github.com/rajivsaicharan2004) as
 an end-to-end demonstration of production-style data engineering
-practices — exactly-once stateful streaming, infrastructure as code,
-data-quality validation against an independent signal, and an honest
-accounting of what happens when a cloud deployment plan doesn't survive
-contact with reality.
+practices — exactly-once stateful streaming, infrastructure as code, and
+data-quality validation against an independent signal. It also includes a
+complete, applied cloud deployment (Terraform on OCI's Always Free tier)
+alongside the local one that's actually live: the IaC is correct and
+ready to run, and the only thing standing between it and being the live
+deployment is OCI's free-tier capacity availability, not the
+implementation — see "Design decisions: infrastructure" below for the
+full story.
 
 ## 🚀 See it in action
 
